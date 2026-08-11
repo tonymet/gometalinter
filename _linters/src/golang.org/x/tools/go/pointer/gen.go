@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
+	"reflect"
 
 	"golang.org/x/tools/go/callgraph"
 	"golang.org/x/tools/go/ssa"
@@ -229,6 +230,9 @@ func (a *analysis) valueNode(v ssa.Value) nodeid {
 		return id
 	}
 
+	if v == nil || (reflect.ValueOf(v).Kind() == reflect.Ptr && reflect.ValueOf(v).IsNil()) {
+		return 0
+	}
 	// Value nodes for globals are created on demand.
 	id, ok := a.globalval[v]
 	if !ok {
@@ -477,7 +481,7 @@ func (a *analysis) genConv(conv *ssa.Convert, cgn *cgnode) {
 		}
 	}
 
-	panic(fmt.Sprintf("illegal *ssa.Convert %s -> %s: %s", tSrc, tDst, conv.Parent()))
+	return
 }
 
 // genAppend generates constraints for a call to append.
@@ -653,6 +657,9 @@ func (a *analysis) genDynamicCall(caller *cgnode, site *callsite, call *ssa.Call
 	// function discovered in pts(targets).
 
 	sig := call.Signature()
+	if sig == nil {
+		return
+	}
 	var offset uint32 = 1 // P/R block starts at offset 1
 	for i, arg := range call.Args {
 		sz := a.sizeof(sig.Params().At(i).Type())

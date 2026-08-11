@@ -122,7 +122,11 @@ func makeWrapper(prog *Program, sel *types.Selection) *Function {
 		if !isPointer(r) {
 			v = emitLoad(fn, v)
 		}
-		c.Call.Value = prog.declaredFunc(obj)
+		targetFn := prog.declaredFunc(obj)
+		if targetFn == nil {
+			return nil
+		}
+		c.Call.Value = targetFn
 		c.Call.Args = append(c.Call.Args, v)
 	} else {
 		c.Call.Method = obj
@@ -203,7 +207,11 @@ func makeBound(prog *Program, obj *types.Func) *Function {
 		var c Call
 
 		if !isInterface(recvType(obj)) { // concrete
-			c.Call.Value = prog.declaredFunc(obj)
+			targetFn := prog.declaredFunc(obj)
+			if targetFn == nil {
+				return nil
+			}
+			c.Call.Value = targetFn
 			c.Call.Args = []Value{fv}
 		} else {
 			c.Call.Value = fv

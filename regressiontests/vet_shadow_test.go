@@ -7,10 +7,6 @@ import (
 )
 
 func TestVetShadow(t *testing.T) {
-	if strings.HasPrefix(runtime.Version(), "go1.8") {
-		t.Skip("go vet does not have a --shadow flag in go1.8")
-	}
-
 	t.Parallel()
 	source := `package test
 
@@ -19,17 +15,18 @@ func test(mystructs []*MyStruct) *MyStruct {
 	var foo *MyStruct
 	for _, mystruct := range mystructs {
 		foo := mystruct
+		_ = foo
 	}
 	return foo
 }
 `
 	expected := Issues{
-		{Linter: "vetshadow", Severity: "warning", Path: "test.go", Line: 7, Col: 3, Message: "foo declared and not used"},
+		{Linter: "vetshadow", Severity: "warning", Path: "test.go", Line: 7, Col: 3, Message: `declaration of "foo" shadows declaration at line 5`},
 	}
 
-	if version := runtime.Version(); strings.HasPrefix(version, "go1.9") {
+	if version := runtime.Version(); strings.HasPrefix(version, "go1.8") {
 		expected = Issues{
-			{Linter: "vetshadow", Severity: "warning", Path: "test.go", Line: 7, Col: 0, Message: `declaration of "foo" shadows declaration at test.go:5`},
+			{Linter: "vetshadow", Severity: "warning", Path: "test.go", Line: 7, Col: 3, Message: "foo declared and not used"},
 		}
 	}
 

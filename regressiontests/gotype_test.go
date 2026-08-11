@@ -20,8 +20,8 @@ func TestGoType(t *testing.T) {
 	defer dir.Remove()
 
 	expected := Issues{
-		{Linter: "gotype", Severity: "error", Path: "file.go", Line: 4, Col: 6, Message: "foo declared but not used"},
-		{Linter: "gotype", Severity: "error", Path: "sub/file.go", Line: 4, Col: 6, Message: "foo declared but not used"},
+		{Linter: "gotype", Severity: "error", Path: "file.go", Line: 4, Col: 6, Message: "declared and not used: foo"},
+		{Linter: "gotype", Severity: "error", Path: "sub/file.go", Line: 4, Col: 6, Message: "declared and not used: foo"},
 	}
 	actual := RunLinter(t, "gotype", dir.Path(), "--skip=excluded")
 	assert.Equal(t, expected, actual)
@@ -36,8 +36,8 @@ func TestGoTypeWithMultiPackageDirectoryTest(t *testing.T) {
 	defer dir.Remove()
 
 	expected := Issues{
-		{Linter: "gotype", Severity: "error", Path: "file.go", Line: 4, Col: 6, Message: "foo declared but not used"},
-		{Linter: "gotypex", Severity: "error", Path: "file_test.go", Line: 4, Col: 6, Message: "foo declared but not used"},
+		{Linter: "gotype", Severity: "error", Path: "file.go", Line: 4, Col: 6, Message: "declared and not used: foo"},
+		{Linter: "gotypex", Severity: "error", Path: "file_test.go", Line: 4, Col: 6, Message: "declared and not used: foo"},
 	}
 	actual := RunLinter(t, "gotype", dir.Path())
 	actual = append(actual, RunLinter(t, "gotypex", dir.Path())...)

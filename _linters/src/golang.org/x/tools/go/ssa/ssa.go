@@ -1343,9 +1343,15 @@ func (c *CallCommon) Pos() token.Pos { return c.pos }
 //
 func (c *CallCommon) Signature() *types.Signature {
 	if c.Method != nil {
-		return c.Method.Type().(*types.Signature)
+		sig, _ := c.Method.Type().(*types.Signature)
+		return sig
 	}
-	return c.Value.Type().Underlying().(*types.Signature)
+	if c.Value != nil {
+		if t, ok := c.Value.Type().Underlying().(*types.Signature); ok {
+			return t
+		}
+	}
+	return nil
 }
 
 // StaticCallee returns the callee if this is a trivially static
@@ -1431,6 +1437,9 @@ func (v *Function) String() string       { return v.RelString(nil) }
 func (v *Function) Package() *Package    { return v.Pkg }
 func (v *Function) Parent() *Function    { return v.parent }
 func (v *Function) Referrers() *[]Instruction {
+	if v == nil {
+		return nil
+	}
 	if v.parent != nil {
 		return &v.referrers
 	}

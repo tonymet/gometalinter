@@ -13,6 +13,7 @@ func TestVet(t *testing.T) {
 	t.Parallel()
 
 	dir := fs.NewDir(t, "test-vet",
+		fs.WithFile("go.mod", "module test\n\ngo 1.25\n"),
 		fs.WithFile("file.go", vetFile("root")),
 		fs.WithFile("file_test.go", vetExternalPackageFile("root_test")),
 		fs.WithDir("sub",
@@ -43,11 +44,11 @@ func TestVet(t *testing.T) {
 		}
 	default:
 		expected = Issues{
-			{Linter: "vet", Severity: "error", Path: "file.go", Line: 7, Col: 0, Message: "Printf format %d reads arg #1, but call has 0 args"},
-			{Linter: "vet", Severity: "error", Path: "file.go", Line: 7, Col: 0, Message: "unreachable code"},
-			{Linter: "vet", Severity: "error", Path: "file_test.go", Line: 5, Col: 0, Message: "unreachable code"},
-			{Linter: "vet", Severity: "error", Path: "sub/file.go", Line: 7, Col: 0, Message: "Printf format %d reads arg #1, but call has 0 args"},
-			{Linter: "vet", Severity: "error", Path: "sub/file.go", Line: 7, Col: 0, Message: "unreachable code"},
+			{Linter: "vet", Severity: "error", Path: "file.go", Line: 7, Col: 2, Message: "unreachable code"},
+			{Linter: "vet", Severity: "error", Path: "file.go", Line: 7, Col: 14, Message: "fmt.Printf format %d reads arg #1, but call has 0 args"},
+			{Linter: "vet", Severity: "error", Path: "file_test.go", Line: 5, Col: 2, Message: "unreachable code"},
+			{Linter: "vet", Severity: "error", Path: "sub/file.go", Line: 7, Col: 2, Message: "unreachable code"},
+			{Linter: "vet", Severity: "error", Path: "sub/file.go", Line: 7, Col: 14, Message: "fmt.Printf format %d reads arg #1, but call has 0 args"},
 		}
 	}
 

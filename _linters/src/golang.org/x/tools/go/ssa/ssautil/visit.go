@@ -50,6 +50,9 @@ func (visit *visitor) program() {
 }
 
 func (visit *visitor) function(fn *ssa.Function) {
+	if fn == nil {
+		return
+	}
 	if !visit.seen[fn] {
 		visit.seen[fn] = true
 		var buf [10]*ssa.Value // avoid alloc in common case

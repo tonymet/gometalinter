@@ -401,8 +401,9 @@ var defaultLinters = map[string]LinterConfig{
 		IsFast:            true,
 	},
 	"vetshadow": {
-		Command:           `go vet --shadow`,
+		Command:           `shadow`,
 		Pattern:           vetPattern,
+		InstallFrom:       "golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow",
 		PartitionStrategy: partitionPathsAsPackages,
 		defaultEnabled:    true,
 		IsFast:            true,

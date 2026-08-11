@@ -425,7 +425,7 @@ func (f *Function) lookup(obj types.Object, escaping bool) Value {
 	// Definition must be in an enclosing function;
 	// plumb it through intervening closures.
 	if f.parent == nil {
-		panic("no ssa.Value for " + obj.String())
+		return nilConst(obj.Type())
 	}
 	outer := f.parent.lookup(obj, true) // escaping
 	v := &FreeVar{

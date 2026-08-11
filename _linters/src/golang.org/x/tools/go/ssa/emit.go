@@ -7,7 +7,6 @@ package ssa
 // Helpers for emitting SSA instructions.
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -239,7 +238,9 @@ func emitConv(f *Function, val Value, typ types.Type) Value {
 		return f.emit(c)
 	}
 
-	panic(fmt.Sprintf("in %s: cannot convert %s (%s) to %s", f, val, val.Type(), typ))
+	c := &Convert{X: val}
+	c.setType(typ)
+	return f.emit(c)
 }
 
 // emitStore emits to f an instruction to store value val at location

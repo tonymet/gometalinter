@@ -85,6 +85,9 @@ func (prog *Program) addMethod(mset *methodSet, sel *types.Selection) *Function 
 		} else {
 			fn = prog.declaredFunc(obj)
 		}
+		if fn == nil {
+			return nil
+		}
 		if fn.Signature.Recv() == nil {
 			panic(fn) // missing receiver
 		}
@@ -121,7 +124,7 @@ func (prog *Program) declaredFunc(obj *types.Func) *Function {
 	if v := prog.packageLevelValue(obj); v != nil {
 		return v.(*Function)
 	}
-	panic("no concrete method: " + obj.String())
+	return nil
 }
 
 // needMethodsOf ensures that runtime type information (including the
@@ -234,6 +237,6 @@ func (prog *Program) needMethods(T types.Type, skip bool) {
 		}
 
 	default:
-		panic(T)
+		// nop
 	}
 }

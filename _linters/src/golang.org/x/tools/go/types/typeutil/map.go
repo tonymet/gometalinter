@@ -83,10 +83,18 @@ func (m *Map) Delete(key types.Type) bool {
 // At returns the map entry for the given key.
 // The result is nil if the entry is not present.
 //
+func isNilType(t types.Type) bool {
+	if t == nil {
+		return true
+	}
+	v := reflect.ValueOf(t)
+	return v.Kind() == reflect.Ptr && v.IsNil()
+}
+
 func (m *Map) At(key types.Type) interface{} {
-	if m != nil && m.table != nil {
+	if m != nil && m.table != nil && !isNilType(key) {
 		for _, e := range m.table[m.hasher.Hash(key)] {
-			if e.key != nil && types.Identical(key, e.key) {
+			if !isNilType(e.key) && types.Identical(key, e.key) {
 				return e.value
 			}
 		}
@@ -104,7 +112,7 @@ func (m *Map) Set(key types.Type, value interface{}) (prev interface{}) {
 		for i, e := range bucket {
 			if e.key == nil {
 				hole = &bucket[i]
-			} else if types.Identical(key, e.key) {
+			} else if !isNilType(key) && !isNilType(e.key) && types.Identical(key, e.key) {
 				prev = e.value
 				bucket[i].value = value
 				return
@@ -269,6 +277,9 @@ func (h Hasher) hashFor(t types.Type) uint32 {
 		return 9067 + 2*h.Hash(t.Elem())
 
 	case *types.Signature:
+		if t == nil {
+			return 9091
+		}
 		var hash uint32 = 9091
 		if t.Variadic() {
 			hash *= 8863
@@ -299,10 +310,13 @@ func (h Hasher) hashFor(t types.Type) uint32 {
 	case *types.Tuple:
 		return h.hashTuple(t)
 	}
-	panic(t)
+	return 9137
 }
 
 func (h Hasher) hashTuple(tuple *types.Tuple) uint32 {
+	if tuple == nil {
+		return 0
+	}
 	// See go/types.identicalTypes for rationale.
 	n := tuple.Len()
 	var hash uint32 = 9137 + 2*uint32(n)

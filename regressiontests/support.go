@@ -39,12 +39,16 @@ type Issues []Issue
 // issues provided.
 func ExpectIssues(t *testing.T, linter string, source string, expected Issues, extraFlags ...string) {
 	// Write source to temporary directory.
-	dir, err := ioutil.TempDir(".", "gometalinter-")
+	dir, err := ioutil.TempDir("", "gometalinter-")
 	require.NoError(t, err)
 	defer os.RemoveAll(dir)
 
 	testFile := filepath.Join(dir, "test.go")
 	err = ioutil.WriteFile(testFile, []byte(source), 0644)
+	require.NoError(t, err)
+
+	goModFile := filepath.Join(dir, "go.mod")
+	err = ioutil.WriteFile(goModFile, []byte("module github.com/alecthomas/gometalinter/regressiontests\n\ngo 1.25\n"), 0644)
 	require.NoError(t, err)
 
 	actual := RunLinter(t, linter, dir, extraFlags...)

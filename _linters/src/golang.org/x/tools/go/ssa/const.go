@@ -65,9 +65,9 @@ func zeroConst(t types.Type) *Const {
 	case *types.Named:
 		return NewConst(zeroConst(t.Underlying()).Value, t)
 	case *types.Array, *types.Struct, *types.Tuple:
-		panic(fmt.Sprint("zeroConst applied to aggregate:", t))
+		return nilConst(t)
 	}
-	panic(fmt.Sprint("zeroConst: unexpected ", t))
+	return nilConst(t)
 }
 
 func (c *Const) RelString(from *types.Package) string {

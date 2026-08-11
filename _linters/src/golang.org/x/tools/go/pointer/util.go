@@ -170,7 +170,7 @@ func (a *analysis) flatten(t types.Type) []*fieldInfo {
 			}
 
 		default:
-			panic(fmt.Sprintf("cannot flatten unsupported type %T", t))
+			fl = []*fieldInfo{{typ: t}}
 		}
 
 		a.flattenMemo[t] = fl
@@ -249,7 +249,10 @@ func (a *analysis) offsetOf(typ types.Type, index int) uint32 {
 // sliceToArray returns the type representing the arrays to which
 // slice type slice points.
 func sliceToArray(slice types.Type) *types.Array {
-	return types.NewArray(slice.Underlying().(*types.Slice).Elem(), 1)
+	if s, ok := slice.Underlying().(*types.Slice); ok {
+		return types.NewArray(s.Elem(), 1)
+	}
+	return types.NewArray(slice, 1)
 }
 
 // Node set -------------------------------------------------------------------

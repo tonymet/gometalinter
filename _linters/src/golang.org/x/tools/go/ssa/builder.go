@@ -403,7 +403,7 @@ func (b *builder) addr(fn *Function, e ast.Expr, escaping bool) lvalue {
 				pos: e.Lbrack,
 			}
 		default:
-			panic("unexpected container type in IndexExpr: " + t.String())
+			return &address{addr: nilConst(fn.Pkg.typeOf(e)), pos: e.Lbrack, expr: e}
 		}
 		v := &IndexAddr{
 			X:     x,
@@ -650,7 +650,7 @@ func (b *builder) expr0(fn *Function, e ast.Expr, tv types.TypeAndValue) Value {
 		case *types.Basic, *types.Slice, *types.Pointer: // *array
 			x = b.expr(fn, e.X)
 		default:
-			panic("unreachable")
+			x = b.expr(fn, e.X)
 		}
 		if e.High != nil {
 			high = b.expr(fn, e.High)
@@ -676,7 +676,8 @@ func (b *builder) expr0(fn *Function, e ast.Expr, tv types.TypeAndValue) Value {
 		// Universal built-in or nil?
 		switch obj := obj.(type) {
 		case *types.Builtin:
-			return &Builtin{name: obj.Name(), sig: tv.Type.(*types.Signature)}
+			sig, _ := tv.Type.(*types.Signature)
+			return &Builtin{name: obj.Name(), sig: sig}
 		case *types.Nil:
 			return nilConst(tv.Type)
 		}
@@ -773,7 +774,7 @@ func (b *builder) expr0(fn *Function, e ast.Expr, tv types.TypeAndValue) Value {
 			return b.addr(fn, e, false).load(fn)
 
 		default:
-			panic("unexpected container type in IndexExpr: " + t.String())
+			return nilConst(tv.Type)
 		}
 
 	case *ast.CompositeLit, *ast.StarExpr:
@@ -781,7 +782,7 @@ func (b *builder) expr0(fn *Function, e ast.Expr, tv types.TypeAndValue) Value {
 		return b.addr(fn, e, false).load(fn)
 	}
 
-	panic(fmt.Sprintf("unexpected expr: %T", e))
+	return nilConst(tv.Type)
 }
 
 // stmtList emits to fn code for all statements in list.
@@ -840,8 +841,10 @@ func (b *builder) setCallFunc(fn *Function, e *ast.CallExpr, c *CallCommon) {
 				c.Method = obj
 			} else {
 				// "Call"-mode call.
-				c.Value = fn.Prog.declaredFunc(obj)
-				c.Args = append(c.Args, v)
+				if fnVal := fn.Prog.declaredFunc(obj); fnVal != nil {
+					c.Value = fnVal
+					c.Args = append(c.Args, v)
+				}
 			}
 			return
 		}
@@ -1228,7 +1231,7 @@ func (b *builder) compLit(fn *Function, addr Value, e *ast.CompositeLit, isZero 
 		sb.store(&address{addr: addr, pos: e.Lbrace, expr: e}, m)
 
 	default:
-		panic("unexpected CompositeLit type: " + t.String())
+		// nop
 	}
 }
 
@@ -1918,7 +1921,8 @@ func (b *builder) rangeStmt(fn *Function, s *ast.RangeStmt, label *lblock) {
 		k, v, loop, done = b.rangeIter(fn, x, tk, tv, s.For)
 
 	default:
-		panic("Cannot range over: " + rt.String())
+		_ = rt
+		return
 	}
 
 	// Evaluate both LHS expressions before we update either.
