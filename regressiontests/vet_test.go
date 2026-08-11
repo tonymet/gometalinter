@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"gotest.tools/fs"
+	"gotest.tools/v3/fs"
 	"github.com/stretchr/testify/assert"
 )
 

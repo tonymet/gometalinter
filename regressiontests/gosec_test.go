@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gotest.tools/fs"
+	"gotest.tools/v3/fs"
 )
 
 const projPath = "src/test-gosec"
