@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: '1.26.x'
+          check-latest: true
+
+      - name: Configure PATH
+        run: |
+          mkdir -p $HOME/go/bin
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Build vendored linters
+        run: |
+          GOBIN=$HOME/go/bin GO111MODULE=off GOPATH=$GITHUB_WORKSPACE/_linters go install \
+            $(find _linters/src -name "*.go" -exec grep -l "^package main" {} + | xargs -n1 dirname | sort -u | sed 's|_linters/src/||')
+
+      - name: Install modern linters and tools
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Build
+        run: go build ./...
+
+      - name: Run govulncheck
+        run: govulncheck ./...
+
+      - name: Run tests
+        run: go test -v ./...

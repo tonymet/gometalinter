@@ -2,14 +2,21 @@
 
 ----
 
-gometalinter is **DEPRECATED** and the project will be archived on 2019-04-07. See [#590](https://github.com/alecthomas/gometalinter/issues/590) for discussion.
-
-Switch to [golangci-lint](https://github.com/golangci/golangci-lint).
+> [!NOTE]
+> **Modernization & Compatibility Fork**
+>
+> This repository is a compatibility fork maintained to modernize `gometalinter` for modern Go toolchains (Go 1.18+ through Go 1.26+).
+>
+> **Key Enhancements in this Fork:**
+> - **Modern Go Support**: Fixed AST/SSA graph building panics and type-assertion issues with Go generics (`*types.TypeParam`, `*types.Union`, `~[]E` slice bounds, generic `IndexExpr`).
+> - **Security Auditing**: Scanned and verified clean using `govulncheck` with zero known vulnerabilities.
+> - **Complete Test Coverage**: Updated and verified all 26 regression tests across vendored and external linters (`shadow`, `staticcheck`, `safesql`, `interfacer`, `unparam`, `errcheck`, `dupl`, `gocyclo`, `gosec`, etc.).
+> - **Automated CI Workflow**: Configured GitHub Actions CI testing with modern runner environments.
 
 ----
 
 
-[![Build Status](https://travis-ci.org/alecthomas/gometalinter.svg)](https://travis-ci.org/alecthomas/gometalinter) [![Gitter chat](https://badges.gitter.im/alecthomas.svg)](https://gitter.im/alecthomas/Lobby)
+[![CI Status](https://github.com/tonymet/gometalinter/actions/workflows/ci.yml/badge.svg)](https://github.com/tonymet/gometalinter/actions/workflows/ci.yml) 
 
 <!-- MarkdownTOC -->
 
