@@ -74,7 +74,7 @@ func setupFlags(app *kingpin.Application) {
 	app.GetFlag("help").Short('h')
 }
 
-func cliLinterOverrides(app *kingpin.Application, element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
+func cliLinterOverrides(element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
 	// expected input structure - <name>:<command-spec>
 	parts := strings.SplitN(*element.Value, ":", 2)
 	if len(parts) < 2 {
@@ -90,9 +90,14 @@ func cliLinterOverrides(app *kingpin.Application, element *kingpin.ParseElement,
 	return nil
 }
 
-func loadDefaultConfig(app *kingpin.Application, element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
+func loadDefaultConfig(element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
 	if element != nil {
 		return nil
+	}
+
+	app := ctx.Application
+	if app == nil {
+		app = kingpin.CommandLine
 	}
 
 	for _, elem := range ctx.Elements {
@@ -109,11 +114,11 @@ func loadDefaultConfig(app *kingpin.Application, element *kingpin.ParseElement, 
 	return loadConfigFile(configFile)
 }
 
-func loadConfig(app *kingpin.Application, element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
+func loadConfig(element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
 	return loadConfigFile(*element.Value)
 }
 
-func disableAction(app *kingpin.Application, element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
+func disableAction(element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
 	out := []string{}
 	for _, linter := range config.Enable {
 		if linter != *element.Value {
@@ -124,17 +129,17 @@ func disableAction(app *kingpin.Application, element *kingpin.ParseElement, ctx 
 	return nil
 }
 
-func enableAction(app *kingpin.Application, element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
+func enableAction(element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
 	config.Enable = append(config.Enable, *element.Value)
 	return nil
 }
 
-func disableAllAction(app *kingpin.Application, element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
+func disableAllAction(element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
 	config.Enable = []string{}
 	return nil
 }
 
-func enableAllAction(app *kingpin.Application, element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
+func enableAllAction(element *kingpin.ParseElement, ctx *kingpin.ParseContext) error {
 	for linter := range defaultLinters {
 		config.Enable = append(config.Enable, linter)
 	}

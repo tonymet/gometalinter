@@ -204,7 +204,7 @@ func TestLoadConfigWithDeadline(t *testing.T) {
 	require.NoError(t, tmpfile.Close())
 
 	filename := tmpfile.Name()
-	err = loadConfig(nil, &kingpin.ParseElement{Value: &filename}, nil)
+	err = loadConfig(&kingpin.ParseElement{Value: &filename}, nil)
 	require.NoError(t, err)
 
 	require.Equal(t, 3*time.Minute, config.Deadline.Duration())
